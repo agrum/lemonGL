@@ -13,7 +13,7 @@
 #define DIRECTIONAL_LIGHT 1
 
 #include "../shader/CProgram.h"
-#include "../texture/CTexture.h"
+#include "../texture/CTexture2D.h"
 #include "CMVP.h"
 
 #include <QVector3D>

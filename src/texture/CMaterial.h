@@ -8,7 +8,9 @@
 #ifndef CMATERIAL_H_
 #define CMATERIAL_H_
 
-#include "CTexture.h"
+#include "CTexture1D.h"
+#include "CTexture2D.h"
+#include "CTexture3D.h"
 
 #include <QVector3D>
 

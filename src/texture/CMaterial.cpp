@@ -48,7 +48,7 @@ void CMaterial::sendToProgram() const {
 		program->sendUniform1i("isDiffuseMap", 0);
 	}
 	else{
-		m_diffuseMap->sendToProgram();
+		m_diffuseMap->send();
 		program->sendUniform1i("isDiffuseMap", 1);
 	}
 	if(m_ambientMap == NULL){
@@ -56,7 +56,7 @@ void CMaterial::sendToProgram() const {
 		program->sendUniform1i("isAmbientMap", 0);
 	}
 	else{
-		m_ambientMap->sendToProgram();
+		m_ambientMap->send();
 		program->sendUniform1i("isAmbientMap", 1);
 	}
 	if(m_specularMap == NULL){
@@ -64,7 +64,7 @@ void CMaterial::sendToProgram() const {
 		program->sendUniform1i("isSpecularMap", 0);
 	}
 	else{
-		m_specularMap->sendToProgram();
+		m_specularMap->send();
 		program->sendUniform1i("isSpecularMap", 1);
 	}
 }
