@@ -10,6 +10,5 @@
 
 #include "glew.h"
 #include <QGLWidget>
-#include "log/CLog.h"
 
 #endif /* CGL_H_ */

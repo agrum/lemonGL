@@ -7,6 +7,11 @@
 
 #include "CMesh.h"
 
+CMesh::CMesh()
+{
+
+}
+
 CMesh::CMesh(const QString& p_group):
 m_group(p_group)
 {

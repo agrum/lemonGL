@@ -14,6 +14,7 @@
 class CMesh : public CObject {
 
 public:
+	CMesh();
 	CMesh(const QString&);
 	CMesh(const CMesh&);
 

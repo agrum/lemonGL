@@ -9,6 +9,7 @@
 #define CLOG_H_
 
 #include "CLogString.h"
+#include "CGLString.h"
 
 #include <QThread>
 #include <QMap>
@@ -37,26 +38,33 @@ public:
 		ERROR_SIGNATURE = 101,
 		ERROR_CODE = 102,
 		ERROR_MESSAGE = 103,
-		ERROR_SIZE = 110
+		ERROR_GL = 110,
+		ERROR_SIZE = 111,
+		ERROR_USED = 112
 	};
 
-	CLog(const QString&, int);
-	~CLog();
+	static void init(const QString&, int);
+	static void close();
 
 	const QString getCodeString(Code);
 	const QString getMsgString(Msg);
 
-	static int sign(void*, const QString&);
-	static int log(void*, Code, Msg, const QString& p_ext = "");
+	static int sign(const void*, const QString&);
+	static int log(const void*, Code, Msg, const QString& p_ext = "");
 	void run();
 
 private:
-	QFile m_logFile;
+	CLog(const QString&, int);
+	~CLog();
+
+private:
 	static CLog* m_log;
-	static int m_logLvl;
-	static QMap<void*, QString> m_signatory;
-	static QQueue<QString> m_pendingLog;
-	static QMutex m_mutex;
+
+	QFile m_logFile;
+	int m_logLvl;
+	QMap<const void*, QString> m_signatory;
+	QQueue<QString> m_pendingLog;
+	QMutex m_mutex;
 };
 
 #endif /* CLOG_H_ */

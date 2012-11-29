@@ -7,6 +7,15 @@
 
 #include "CTexture2D.h"
 
+CTexture2D::CTexture2D(QString p_prefix, QString p_path, GLuint p_channel):
+CTexture(p_prefix, p_channel, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE)
+{
+	m_target = GL_TEXTURE_2D;
+	setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	appendImg(p_path);
+}
+
 CTexture2D::CTexture2D(QString p_prefix, GLuint p_channel, GLenum p_intFormat, GLenum p_format, GLenum p_type):
 CTexture(p_prefix, p_channel, p_intFormat, p_format, p_type),
 m_width(512),

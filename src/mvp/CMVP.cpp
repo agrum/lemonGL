@@ -83,7 +83,8 @@ void CMVP::lookForward(float p_angle){
 	m_viewMatrix.lookAt(m_position, m_position + m_direction, m_vertical);
 }
 
-void CMVP::lookAt(GLfloat eyeX, GLfloat eyeY, GLfloat eyeZ, GLfloat targetX, GLfloat targetY, GLfloat targetZ){
+void CMVP::lookAt(GLfloat eyeX, GLfloat eyeY, GLfloat eyeZ,
+		GLfloat targetX, GLfloat targetY, GLfloat targetZ){
 	QVector3D eye(eyeX, eyeY, eyeZ);
 	QVector3D target(targetX, targetY, targetZ);
 	QVector3D tmp = target - eye;
@@ -96,6 +97,20 @@ void CMVP::lookAt(GLfloat eyeX, GLfloat eyeY, GLfloat eyeZ, GLfloat targetX, GLf
 	}
 	else
 		tmp = QVector3D(0,0,1);
+
+	m_viewMatrix.setToIdentity();
+	m_viewMatrix.lookAt(eye, target, tmp);
+	m_position = eye;
+	m_direction = tmp;
+}
+
+void CMVP::lookAt(GLfloat eyeX, GLfloat eyeY, GLfloat eyeZ,
+		GLfloat targetX, GLfloat targetY, GLfloat targetZ,
+		GLfloat baseX, GLfloat baseY, GLfloat baseZ){
+	QVector3D eye(eyeX, eyeY, eyeZ);
+	QVector3D target(targetX, targetY, targetZ);
+	QVector3D tmp(baseX, baseY, baseZ);
+	tmp.normalize();
 
 	m_viewMatrix.setToIdentity();
 	m_viewMatrix.lookAt(eye, target, tmp);

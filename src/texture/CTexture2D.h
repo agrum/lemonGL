@@ -13,6 +13,7 @@
 class CTexture2D : public CTexture {
 
 public:
+	CTexture2D(QString, QString, GLuint);
 	CTexture2D(QString, GLuint, GLenum, GLenum, GLenum);
 
 	void setWidth(int);

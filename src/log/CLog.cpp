@@ -8,10 +8,6 @@
 #include "CLog.h"
 
 CLog* CLog::m_log = NULL;
-int CLog::m_logLvl = 0;
-QMap<void*, QString> CLog::m_signatory;
-QQueue<QString> CLog::m_pendingLog;
-QMutex CLog::m_mutex;
 
 CLog::CLog(const QString& p_logPath, int p_logLvl) :
 		m_logFile(p_logPath)
@@ -32,35 +28,52 @@ CLog::~CLog(){
 	m_logFile.close();
 }
 
-int CLog::sign(void* p_key, const QString& p_value){
+void CLog::init(const QString& p_logPath, int p_logLvl){
+	if(m_log == NULL)
+		new CLog(p_logPath, p_logLvl);
+}
+
+void CLog::close(){
+	if(m_log != NULL)
+		delete m_log;
+}
+
+int CLog::sign(const void* p_key, const QString& p_value){
+	if(m_log == NULL)
+		return -1;
+
 	if(p_key == NULL || p_value.isNull())
 		return log(m_log, CLog::ERROR, CLog::ERROR_SIGNATURE, "Signature empty");
 
 	QString value = p_value;
-	if(value.length() < CLOG_SIGN_LENGTH)
-		value = value.fill('-', CLOG_SIGN_LENGTH - value.length());
-	else if(value.length() > CLOG_SIGN_LENGTH)
+	while(value.length() < CLOG_SIGN_LENGTH)
+		value += '-';
+	if(value.length() > CLOG_SIGN_LENGTH)
 		value = value.left(CLOG_SIGN_LENGTH);
 
-	m_signatory.insert(p_key, value);
+	m_log->m_signatory.insert(p_key, value);
 
-	return 0;
+	return 1;
 }
 
-int CLog::log(void* p_signKey, Code p_code, Msg p_msg, const QString& p_ext){
-	if(p_code == ALL)
+int CLog::log(const void* p_signKey, Code p_code, Msg p_msg, const QString& p_ext){
+	if(m_log == NULL)
+		return -1;
+	else if(p_code == ALL)
 		return log(m_log, CLog::ERROR, CLog::ERROR_CODE, "Asked for ALL code");
-	else if((p_code & m_logLvl) == 0)
+	else if((p_code & m_log->m_logLvl) == 0)
 		return 0;
 
-	QString sign = m_signatory.value(p_signKey);
+	QString addr = QString("%1").arg((int) p_signKey, 0, 16);
+	QString sign = m_log->m_signatory.value(p_signKey);
 	QString code = m_log->getCodeString(p_code);
 	QString msg = m_log->getMsgString(p_msg);
-	QString logMsg = QString("(%1) %2 | %3::%4 | %5")
+	QString logMsg = QString("(%1) %2 | %3::%4 | %5 | %6")
 							.arg(code)
 							.arg(QTime::currentTime().toString("hh:mm:ss.zzz"))
 							.arg(sign)
 							.arg(msg)
+							.arg(addr)
 							.arg(p_ext);
 
 	if(code.isNull())
@@ -69,9 +82,9 @@ int CLog::log(void* p_signKey, Code p_code, Msg p_msg, const QString& p_ext){
 		return log(m_log, CLog::ERROR, CLog::ERROR_MESSAGE, sign);
 
 	qDebug() << logMsg;
-	m_mutex.lock();
-	m_pendingLog.enqueue(logMsg);
-	m_mutex.unlock();
+	m_log->m_mutex.lock();
+	m_log->m_pendingLog.enqueue(logMsg);
+	m_log->m_mutex.unlock();
 
 	return 0;
 }
@@ -122,8 +135,14 @@ const QString CLog::getMsgString(Msg p_msg){
 	case ERROR_MESSAGE :
 		return CLOG_MSG_ERROR_MESSAGE;
 		break;
+	case ERROR_GL :
+		return CLOG_MSG_ERROR_GL;
+		break;
 	case ERROR_SIZE :
 		return CLOG_MSG_ERROR_SIZE;
+		break;
+	case ERROR_USED :
+		return CLOG_MSG_ERROR_USED;
 		break;
 	default :
 		;

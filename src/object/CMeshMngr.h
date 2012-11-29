@@ -24,7 +24,7 @@ public:
 	static void add(const QString&);
 	static void free();
 
-	static CMesh* get(const QString&);
+	static CMesh get(const QString&);
 
 private:
 	CMeshMngr(){}

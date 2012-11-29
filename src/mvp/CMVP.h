@@ -33,7 +33,11 @@ public:
 	void lookUp(float);
 	void lookLeft(float);
 	void lookForward(float);
-	void lookAt(float eyeX, float eyeY, float eyeZ, float targetX, float targetY, float targetZ);
+	void lookAt(float eyeX, float eyeY, float eyeZ,
+			float targetX, float targetY, float targetZ);
+	void lookAt(float eyeX, float eyeY, float eyeZ,
+			float targetX, float targetY, float targetZ,
+			float baseX, float baseY, float baseZ);
 
 protected:
 	GLuint m_width, m_height;

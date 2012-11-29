@@ -44,7 +44,7 @@ int CProgram::createShader(const QString& p_filename, GLenum p_shaderType){
 	const GLchar* content = loadShader(p_filename);
 
 	if (content == NULL){
-		qDebug() << "Echec du chargement d'un shader\n" << p_filename;
+		//qDebug() << "Echec du chargement d'un shader\n" << p_filename;
 		return -1;
 	}
 
