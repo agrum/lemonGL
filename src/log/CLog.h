@@ -51,7 +51,8 @@ public:
 		ERROR_MESSAGE = 103,
 		ERROR_GL = 110,
 		ERROR_SIZE = 111,
-		ERROR_USED = 112
+		ERROR_USED = 112,
+		ERROR_NULL = 113
 	};
 
 	static void init(const QString&, int);

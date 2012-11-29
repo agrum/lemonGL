@@ -75,7 +75,7 @@ int CLog::log(const void* p_signKey, Code p_code, Msg p_msg, const QString& p_ex
 	else if((p_code & m_log->m_logLvl) == 0)
 		return 0;
 
-	QString addr = QString("%1").arg((int) p_signKey, 0, 16);
+	QString addr = QString("%1").arg((int) p_signKey, 16, 16);
 	QString sign = m_log->m_signatory.value(p_signKey);
 	QString code = m_log->getCodeString(p_code);
 	QString msg = m_log->getMsgString(p_msg);
@@ -154,6 +154,9 @@ const QString CLog::getMsgString(Msg p_msg){
 		break;
 	case ERROR_USED :
 		return CLOG_MSG_ERROR_USED;
+		break;
+	case ERROR_NULL :
+		return CLOG_MSG_ERROR_NULL;
 		break;
 	default :
 		;

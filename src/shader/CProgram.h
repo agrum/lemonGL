@@ -20,6 +20,7 @@
 #define CPROGRAM_H_
 
 #include "../CGL.h"
+#include "../log/CLog.h"
 
 #include <QVector>
 #include <QLinkedList>

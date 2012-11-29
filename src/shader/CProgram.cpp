@@ -24,7 +24,7 @@ CProgram::CProgram():
 m_init(false),
 m_id(0)
 {
-
+	CLog::sign(this, "CProgram");
 }
 
 CProgram::~CProgram(){
@@ -55,7 +55,7 @@ int CProgram::createShader(const QString& p_filename, GLenum p_shaderType){
 	const GLchar* content = loadShader(p_filename);
 
 	if (content == NULL){
-		//qDebug() << "Echec du chargement d'un shader\n" << p_filename;
+		CLog::log(this, CLog::INFO, CLog::ERROR_NULL, "Can't load shader " + p_filename);
 		return -1;
 	}
 
@@ -70,7 +70,8 @@ int CProgram::createShader(const QString& p_filename, GLenum p_shaderType){
 		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logSize);
 		log.resize(logSize - 1);
 		glGetShaderInfoLog(shader, logSize, &logSize, log.data());
-		qDebug() << QString("Echec de la compilation du %1 shader %2:\n\n%3").arg((p_shaderType == GL_VERTEX_SHADER) ? "vertex" : "fragment").arg(p_filename).arg(QString(log));
+		CLog::log(this, CLog::ERROR, CLog::ERROR_NULL, "Fail compile shader " + p_filename);
+		qDebug() << QString("Fail compile shader %:\n\n%2").arg(p_filename).arg(QString(log));
 		return -2;
 	}
 	glAttachShader(m_id, shader);
@@ -85,8 +86,7 @@ void CProgram::initProgram( const QString& p_shaderPrefix ){
 
 	m_id = glCreateProgram();
 	createShader(p_shaderPrefix + ".vs", GL_VERTEX_SHADER);
-	//createShader(p_shaderPrefix + ".ts", GL_TESS_CONTROL_SHADER);
-	//createShader(p_shaderPrefix + ".gs", GL_GEOMETRY_SHADER);
+	createShader(p_shaderPrefix + ".gs", GL_GEOMETRY_SHADER);
 	createShader(p_shaderPrefix + ".fs", GL_FRAGMENT_SHADER);
 
 	GLint status, logSize;
@@ -97,7 +97,8 @@ void CProgram::initProgram( const QString& p_shaderPrefix ){
 		glGetProgramiv(m_id, GL_INFO_LOG_LENGTH, &logSize);
 		log.resize(logSize - 1);
 		glGetProgramInfoLog(m_id, logSize, &logSize, log.data());
-		qDebug() << QString("Echec du linkage du programme:\n\n%1").arg(QString(log));
+		CLog::log(this, CLog::ERROR, CLog::ERROR_NULL, "Fail link program");
+		qDebug() << QString("Fail link program \n\n%1").arg(QString(log));
 		return;
 	}
 }
