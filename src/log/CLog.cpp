@@ -58,7 +58,7 @@ int CLog::sign(const void* p_key, const QString& p_value){
 
 	QString value = p_value;
 	while(value.length() < CLOG_SIGN_LENGTH)
-		value += '-';
+		value = ' ' + value;
 	if(value.length() > CLOG_SIGN_LENGTH)
 		value = value.left(CLOG_SIGN_LENGTH);
 

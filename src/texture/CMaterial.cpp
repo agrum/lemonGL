@@ -52,31 +52,29 @@ CMaterial::~CMaterial(){
 }
 
 void CMaterial::sendToProgram() const {
-	CProgram* program = CProgram::current();
-
 	if(m_diffuseMap == NULL){
-		program->sendUniform3f("diffuse", m_diffuse.x(), m_diffuse.y(), m_diffuse.z());
-		program->sendUniform1i("isDiffuseMap", 0);
+		CShaderInterface::sendUniform3f("diffuse", m_diffuse.x(), m_diffuse.y(), m_diffuse.z());
+		CShaderInterface::sendUniform1i("isDiffuseMap", 0);
 	}
 	else{
 		m_diffuseMap->send();
-		program->sendUniform1i("isDiffuseMap", 1);
+		CShaderInterface::sendUniform1i("isDiffuseMap", 1);
 	}
 	if(m_ambientMap == NULL){
-		program->sendUniform3f("ambient", m_ambient.x(), m_ambient.y(), m_ambient.z());
-		program->sendUniform1i("isAmbientMap", 0);
+		CShaderInterface::sendUniform3f("ambient", m_ambient.x(), m_ambient.y(), m_ambient.z());
+		CShaderInterface::sendUniform1i("isAmbientMap", 0);
 	}
 	else{
 		m_ambientMap->send();
-		program->sendUniform1i("isAmbientMap", 1);
+		CShaderInterface::sendUniform1i("isAmbientMap", 1);
 	}
 	if(m_specularMap == NULL){
-		program->sendUniform3f("specular", m_specular.x(), m_specular.y(), m_specular.z());
-		program->sendUniform1i("isSpecularMap", 0);
+		CShaderInterface::sendUniform3f("specular", m_specular.x(), m_specular.y(), m_specular.z());
+		CShaderInterface::sendUniform1i("isSpecularMap", 0);
 	}
 	else{
 		m_specularMap->send();
-		program->sendUniform1i("isSpecularMap", 1);
+		CShaderInterface::sendUniform1i("isSpecularMap", 1);
 	}
 }
 

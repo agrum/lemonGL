@@ -19,7 +19,7 @@
 #ifndef CMVP_H_
 #define CMVP_H_
 
-#include "../shader/CProgram.h"
+#include "../shader/CShaderInterface.h"
 #include "../texture/CTexture.h"
 #include "../object/CVA.h"
 

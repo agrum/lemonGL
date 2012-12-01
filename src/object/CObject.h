@@ -19,7 +19,7 @@
 #ifndef COBJECT_H_
 #define COBJECT_H_
 
-#include "../shader/CProgram.h"
+#include "../shader/CShaderInterface.h"
 #include "../mvp/CMVP.h"
 #include "../mvp/CLight.h"
 #include "../texture/CMaterial.h"
@@ -35,6 +35,7 @@ public:
 	virtual void drawSub() = 0;
 	virtual void order(const QMatrix4x4&) {}
 
+	void setParent(const CObject*);
 	void setMaterial(const CMaterial*);
 
 	void translucent(bool p_b) { m_translucent = p_b; }
@@ -46,7 +47,11 @@ public:
 	void rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z);
 	void scale(GLfloat x, GLfloat y, GLfloat z);
 
+private:
+	const QMatrix4x4 modelMatrix() const;
+
 protected:
+	const CObject* m_parent;
 	const CMaterial* m_mat;
 	QMatrix4x4 m_modelMatrix;
 	QLinkedList<QMatrix4x4> m_matrixStack;

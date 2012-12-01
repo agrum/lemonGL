@@ -19,6 +19,7 @@
 #include "CObject.h"
 
 CObject::CObject():
+m_parent(NULL),
 m_mat(CMaterialMngr::get("default")),
 m_translucent(false)
 {
@@ -26,6 +27,7 @@ m_translucent(false)
 }
 
 CObject::CObject(const CObject& p_o):
+m_parent(p_o.m_parent),
 m_mat(p_o.m_mat)
 {
 
@@ -37,7 +39,7 @@ void CObject::draw(const CMVP* p_camera, QList<CLight*>* p_lights, QVector2D p_b
 	float mvi[9];
 	const QMatrix4x4 camView = p_camera->viewMatrix();
 	const QMatrix4x4 camProj = p_camera->projMatrix();
-	const QMatrix4x4 modelView = camView * m_modelMatrix;
+	const QMatrix4x4 modelView = camView * modelMatrix();
 	const QMatrix4x4 modelViewProj = camProj * modelView;
 	const CLight* light;
 
@@ -51,9 +53,9 @@ void CObject::draw(const CMVP* p_camera, QList<CLight*>* p_lights, QVector2D p_b
 	glVertexAttribPointer( 1, 2, GL_FLOAT, GL_FALSE, 0, CVA::textures() );
 	glVertexAttribPointer( 2, 3, GL_FLOAT, GL_FALSE, 0, CVA::normals() );
 
-	CProgram::current()->sendUniformMatrix4fv("mvp", 1, GL_TRUE, mvp);
-	CProgram::current()->sendUniformMatrix4fv("mv", 1, GL_TRUE, mv);
-	CProgram::current()->sendUniformMatrix3fv("mvi", 1, GL_TRUE, mvi);
+	CShaderInterface::sendUniformMatrix4fv("mvp", 1, GL_TRUE, mvp);
+	CShaderInterface::sendUniformMatrix4fv("mv", 1, GL_TRUE, mv);
+	CShaderInterface::sendUniformMatrix3fv("mvi", 1, GL_TRUE, mvi);
 
 	order(modelViewProj);
 
@@ -76,6 +78,10 @@ void CObject::draw(const CMVP* p_camera, QList<CLight*>* p_lights, QVector2D p_b
 	}
 
 	CVA::disable();
+}
+
+void CObject::setParent(const CObject* p_obj){
+	m_parent = p_obj;
 }
 
 void CObject::setMaterial(const CMaterial* p_mat){
@@ -107,6 +113,12 @@ void CObject::rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 void CObject::scale(GLfloat x, GLfloat y, GLfloat z)
 {
 	m_modelMatrix.scale(x, y, z);
+}
+
+const QMatrix4x4 CObject::modelMatrix() const {
+	if(m_parent != NULL)
+		return m_parent->modelMatrix() * m_modelMatrix;
+	return m_modelMatrix;
 }
 
 void CObject::convertMatrix(const QMatrix4x4 p_in, float* p_out){

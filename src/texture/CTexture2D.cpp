@@ -54,7 +54,6 @@ void CTexture2D::setHeight(int p_h){
 }
 
 void CTexture2D::sendToProgram(const QMatrix4x4& p_mvp) const {
-	CProgram* program = CProgram::current();
 	float tex[16];
 	QMatrix4x4 tmp(
 			0.5, 0.0, 0.0, 0.5,
@@ -66,8 +65,8 @@ void CTexture2D::sendToProgram(const QMatrix4x4& p_mvp) const {
 		for(int b = 0; b < 4; b++)
 			tex[a*4 + b] = tmp(a, b);
 
-	program->sendUniformMatrix4fv(m_prefix + "TexMat", 1, GL_TRUE, tex);
-	program->sendUniform1i(m_prefix + "TexMap", m_channel);
+	CShaderInterface::sendUniformMatrix4fv(m_prefix + "TexMat", 1, GL_TRUE, tex);
+	CShaderInterface::sendUniform1i(m_prefix + "TexMap", m_channel);
 
 	glActiveTexture(GL_TEXTURE0 + m_channel);
 	glBindTexture(GL_TEXTURE_2D, m_id);

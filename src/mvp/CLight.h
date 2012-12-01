@@ -22,7 +22,7 @@
 #define POINT_LIGHT 0
 #define DIRECTIONAL_LIGHT 1
 
-#include "../shader/CProgram.h"
+#include "../shader/CShaderInterface.h"
 #include "../texture/CTexture2D.h"
 #include "CMVP.h"
 

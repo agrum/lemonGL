@@ -21,7 +21,7 @@
 
 #include "../CGL.h"
 #include "../log/CLog.h"
-#include "../shader/CProgram.h"
+#include "../shader/CShaderInterface.h"
 
 #include <limits>
 #include <cmath>

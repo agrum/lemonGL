@@ -97,8 +97,7 @@ void CTexture::setParameter(GLenum p_name, GLint p_param){
 
 void CTexture::send() const {
 	glGetError();
-	CProgram* program = CProgram::current();
-	program->sendUniform1i(m_prefix + "TexMap", m_channel);
+	CShaderInterface::sendUniform1i(m_prefix + "TexMap", m_channel);
 	if(!m_fixed){
 		glActiveTexture(GL_TEXTURE0 + m_channel);
 		glBindTexture(m_target, m_id);

@@ -107,5 +107,6 @@ CMesh CMeshMngr::get(const QString& p_group){
 	for(int b = 0; b < m_meshes.size(); b++)
 		if(m_meshes[b] == p_group)
 			return m_meshes[b];
+	qDebug() << "Mesh not found";
 	return CMesh ();
 }

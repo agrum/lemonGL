@@ -16,22 +16,44 @@
 	along with lemonGL.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CProgram.h"
+#include "CShaderInterface.h"
 
-CProgram* CProgram::m_used = NULL;
+CShaderInterface CShaderInterface::m_singleton;
 
-CProgram::CProgram():
-m_init(false),
-m_id(0)
-{
-	CLog::sign(this, "CProgram");
+CShaderInterface::CShaderInterface(){
+	CLog::sign(this, "CShaderInterface");
 }
 
-CProgram::~CProgram(){
-	glDeleteProgram(m_id);
+CShaderInterface::~CShaderInterface(){
+	while(!m_programList.empty())
+		glDeleteProgram(m_programList.takeFirst());
 }
 
-char* CProgram::loadShader( const QString& p_filename ){
+GLint CShaderInterface::add(const QString& p_name){
+	return m_singleton.initProgram(p_name);
+}
+
+bool CShaderInterface::del(GLuint p_id){
+	if(m_singleton.m_programList.contains(p_id)){
+		m_singleton.m_programList.removeOne(p_id);
+		glDeleteProgram(p_id);
+		return true;
+	}
+	return false;
+}
+
+bool CShaderInterface::use(GLuint p_id){
+	if(m_singleton.m_programList.contains(p_id)){
+		m_singleton.m_current = p_id;
+		glUseProgram(p_id);
+		return true;
+	}
+	return false;
+}
+
+//----
+
+char* CShaderInterface::loadShader( const QString& p_filename ){
 	FILE* fp;
 	char* content = NULL;
 	long length;
@@ -43,7 +65,8 @@ char* CProgram::loadShader( const QString& p_filename ){
 		length = ftell( fp );
 		fseek( fp, 0, SEEK_SET );
 		content = new char [length+1];
-		fread( content, sizeof( char ), length, fp );
+		if(!fread( content, sizeof( char ), length, fp ))
+			qDebug() << "meeeh";
 		fclose( fp );
 		content[length] = '\0';
 	}
@@ -51,7 +74,7 @@ char* CProgram::loadShader( const QString& p_filename ){
 	return content;
 }
 
-int CProgram::createShader(const QString& p_filename, GLenum p_shaderType){
+int CShaderInterface::createShader(GLuint p_id, const QString& p_filename, GLenum p_shaderType){
 	const GLchar* content = loadShader(p_filename);
 
 	if (content == NULL){
@@ -74,161 +97,161 @@ int CProgram::createShader(const QString& p_filename, GLenum p_shaderType){
 		qDebug() << QString("Fail compile shader %:\n\n%2").arg(p_filename).arg(QString(log));
 		return -2;
 	}
-	glAttachShader(m_id, shader);
+	glAttachShader(p_id, shader);
 	delete [] content;
 
 	return 0;
 }
 
-void CProgram::initProgram( const QString& p_shaderPrefix ){
-	if(m_init)
-		return;
-
-	m_id = glCreateProgram();
-	createShader(p_shaderPrefix + ".vs", GL_VERTEX_SHADER);
-	createShader(p_shaderPrefix + ".gs", GL_GEOMETRY_SHADER);
-	createShader(p_shaderPrefix + ".fs", GL_FRAGMENT_SHADER);
+GLint CShaderInterface::initProgram( const QString& p_shaderPrefix ){
+	GLuint id = glCreateProgram();
+	createShader(id, p_shaderPrefix + ".vs", GL_VERTEX_SHADER);
+	createShader(id, p_shaderPrefix + ".gs", GL_GEOMETRY_SHADER);
+	createShader(id, p_shaderPrefix + ".fs", GL_FRAGMENT_SHADER);
 
 	GLint status, logSize;
 	QByteArray log;
-	glLinkProgram(m_id);
-	glGetProgramiv(m_id, GL_LINK_STATUS, &status);
+	glLinkProgram(id);
+	glGetProgramiv(id, GL_LINK_STATUS, &status);
 	if(status != GL_TRUE){
-		glGetProgramiv(m_id, GL_INFO_LOG_LENGTH, &logSize);
+		glGetProgramiv(id, GL_INFO_LOG_LENGTH, &logSize);
 		log.resize(logSize - 1);
-		glGetProgramInfoLog(m_id, logSize, &logSize, log.data());
+		glGetProgramInfoLog(id, logSize, &logSize, log.data());
 		CLog::log(this, CLog::ERROR, CLog::ERROR_NULL, "Fail link program");
 		qDebug() << QString("Fail link program \n\n%1").arg(QString(log));
-		return;
+		glDeleteProgram(id);
+		return -1;
 	}
+	m_programList.push_back(id);
+	return id;
 }
 
 //----------
 
-void CProgram::sendUniform1f(const QString& p_name,  GLfloat  v0){
+void CShaderInterface::sendUniform1f(const QString& p_name,  GLfloat  v0){
 	QByteArray ba = p_name.toLocal8Bit();
-	glUniform1f( glGetUniformLocation( m_id, (const char*) ba.data() ), v0 );
+	glUniform1f( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), v0 );
 }
 
-void CProgram::sendUniform2f(const QString& p_name,  GLfloat  v0,  GLfloat  v1){
+void CShaderInterface::sendUniform2f(const QString& p_name,  GLfloat  v0,  GLfloat  v1){
 	QByteArray ba = p_name.toLocal8Bit();
-	glUniform2f( glGetUniformLocation( m_id, (const char*) ba.data() ), v0, v1 );
+	glUniform2f( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), v0, v1 );
 }
-void CProgram::sendUniform3f(const QString& p_name,  GLfloat  v0,  GLfloat  v1,  GLfloat  v2){
+void CShaderInterface::sendUniform3f(const QString& p_name,  GLfloat  v0,  GLfloat  v1,  GLfloat  v2){
 	QByteArray ba = p_name.toLocal8Bit();
-	glUniform3f( glGetUniformLocation( m_id, (const char*) ba.data() ), v0, v1, v2 );
-}
-
-void CProgram::sendUniform4f(const QString& p_name,  GLfloat  v0,  GLfloat  v1,  GLfloat  v2,  GLfloat  v3){
-	QByteArray ba = p_name.toLocal8Bit();
-	glUniform4f( glGetUniformLocation( m_id, (const char*) ba.data() ), v0, v1, v2, v3 );
+	glUniform3f( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), v0, v1, v2 );
 }
 
-void CProgram::sendUniform1i(const QString& p_name,  GLint  v0){
+void CShaderInterface::sendUniform4f(const QString& p_name,  GLfloat  v0,  GLfloat  v1,  GLfloat  v2,  GLfloat  v3){
 	QByteArray ba = p_name.toLocal8Bit();
-	glUniform1i( glGetUniformLocation( m_id, (const char*) ba.data() ), v0 );
+	glUniform4f( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), v0, v1, v2, v3 );
 }
 
-void CProgram::sendUniform2i(const QString& p_name,  GLint  v0,  GLint  v1){
+void CShaderInterface::sendUniform1i(const QString& p_name,  GLint  v0){
 	QByteArray ba = p_name.toLocal8Bit();
-	glUniform2i( glGetUniformLocation( m_id, (const char*) ba.data() ), v0, v1 );
+	glUniform1i( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), v0 );
 }
 
-void CProgram::sendUniform3i(const QString& p_name,  GLint  v0,  GLint  v1,  GLint  v2){
+void CShaderInterface::sendUniform2i(const QString& p_name,  GLint  v0,  GLint  v1){
 	QByteArray ba = p_name.toLocal8Bit();
-	glUniform3i( glGetUniformLocation( m_id, (const char*) ba.data() ), v0, v1, v2 );
+	glUniform2i( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), v0, v1 );
 }
 
-void CProgram::sendUniform4i(const QString& p_name,  GLint  v0,  GLint  v1,  GLint  v2,  GLint  v3){
+void CShaderInterface::sendUniform3i(const QString& p_name,  GLint  v0,  GLint  v1,  GLint  v2){
 	QByteArray ba = p_name.toLocal8Bit();
-	glUniform4i( glGetUniformLocation( m_id, (const char*) ba.data() ), v0, v1, v2, v3 );
+	glUniform3i( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), v0, v1, v2 );
 }
 
-
-void CProgram::sendUniform1fv(const QString& p_name,  GLsizei  count,  const GLfloat * value){
+void CShaderInterface::sendUniform4i(const QString& p_name,  GLint  v0,  GLint  v1,  GLint  v2,  GLint  v3){
 	QByteArray ba = p_name.toLocal8Bit();
-	glUniform1fv( glGetUniformLocation( m_id, (const char*) ba.data() ), count, value );
-}
-
-void CProgram::sendUniform2fv(const QString& p_name,  GLsizei  count,  const GLfloat * value){
-	QByteArray ba = p_name.toLocal8Bit();
-	glUniform2fv( glGetUniformLocation( m_id, (const char*) ba.data() ), count, value );
-}
-
-void CProgram::sendUniform3fv(const QString& p_name,  GLsizei  count,  const GLfloat * value){
-	QByteArray ba = p_name.toLocal8Bit();
-	glUniform3fv( glGetUniformLocation( m_id, (const char*) ba.data() ), count, value );
-}
-
-void CProgram::sendUniform4fv(const QString& p_name,  GLsizei  count,  const GLfloat * value){
-	QByteArray ba = p_name.toLocal8Bit();
-	glUniform4fv( glGetUniformLocation( m_id, (const char*) ba.data() ), count, value );
-}
-
-void CProgram::sendUniform1iv(const QString& p_name,  GLsizei  count,  const GLint * value){
-	QByteArray ba = p_name.toLocal8Bit();
-	glUniform1iv( glGetUniformLocation( m_id, (const char*) ba.data() ), count, value );
-}
-
-void CProgram::sendUniform2iv(const QString& p_name,  GLsizei  count,  const GLint * value){
-	QByteArray ba = p_name.toLocal8Bit();
-	glUniform2iv( glGetUniformLocation( m_id, (const char*) ba.data() ), count, value );
-}
-
-void CProgram::sendUniform3iv(const QString& p_name,  GLsizei  count,  const GLint * value){
-	QByteArray ba = p_name.toLocal8Bit();
-	glUniform3iv( glGetUniformLocation( m_id, (const char*) ba.data() ), count, value );
-}
-
-void CProgram::sendUniform4iv(const QString& p_name,  GLsizei  count,  const GLint * value){
-	QByteArray ba = p_name.toLocal8Bit();
-	glUniform4iv( glGetUniformLocation( m_id, (const char*) ba.data() ), count, value );
+	glUniform4i( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), v0, v1, v2, v3 );
 }
 
 
-void CProgram::sendUniformMatrix2fv(const QString& p_name,  GLsizei  count,  GLboolean  transpose,  const GLfloat * value){
+void CShaderInterface::sendUniform1fv(const QString& p_name,  GLsizei  count,  const GLfloat * value){
 	QByteArray ba = p_name.toLocal8Bit();
-	glUniformMatrix2fv( glGetUniformLocation( m_id, (const char*) ba.data() ), count, transpose, value );
+	glUniform1fv( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), count, value );
 }
 
-void CProgram::sendUniformMatrix3fv(const QString& p_name,  GLsizei  count,  GLboolean  transpose,  const GLfloat * value){
+void CShaderInterface::sendUniform2fv(const QString& p_name,  GLsizei  count,  const GLfloat * value){
 	QByteArray ba = p_name.toLocal8Bit();
-	glUniformMatrix3fv( glGetUniformLocation( m_id, (const char*) ba.data() ), count, transpose, value );
+	glUniform2fv( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), count, value );
 }
 
-void CProgram::sendUniformMatrix4fv(const QString& p_name,  GLsizei  count,  GLboolean  transpose,  const GLfloat * value){
+void CShaderInterface::sendUniform3fv(const QString& p_name,  GLsizei  count,  const GLfloat * value){
 	QByteArray ba = p_name.toLocal8Bit();
-	glUniformMatrix4fv( glGetUniformLocation( m_id, (const char*) ba.data() ), count, transpose, value );
+	glUniform3fv( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), count, value );
 }
 
-void CProgram::sendUniformMatrix2x3fv(const QString& p_name,  GLsizei  count,  GLboolean  transpose,  const GLfloat * value){
+void CShaderInterface::sendUniform4fv(const QString& p_name,  GLsizei  count,  const GLfloat * value){
 	QByteArray ba = p_name.toLocal8Bit();
-	glUniformMatrix2x3fv( glGetUniformLocation( m_id, (const char*) ba.data() ), count, transpose, value );
+	glUniform4fv( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), count, value );
 }
 
-void CProgram::sendUniformMatrix3x2fv(const QString& p_name,  GLsizei  count,  GLboolean  transpose,  const GLfloat * value){
+void CShaderInterface::sendUniform1iv(const QString& p_name,  GLsizei  count,  const GLint * value){
 	QByteArray ba = p_name.toLocal8Bit();
-	glUniformMatrix3x2fv( glGetUniformLocation( m_id, (const char*) ba.data() ), count, transpose, value );
+	glUniform1iv( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), count, value );
 }
 
-void CProgram::sendUniformMatrix2x4fv(const QString& p_name,  GLsizei  count,  GLboolean  transpose,  const GLfloat * value){
+void CShaderInterface::sendUniform2iv(const QString& p_name,  GLsizei  count,  const GLint * value){
 	QByteArray ba = p_name.toLocal8Bit();
-	glUniformMatrix2x4fv( glGetUniformLocation( m_id, (const char*) ba.data() ), count, transpose, value );
+	glUniform2iv( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), count, value );
 }
 
-void CProgram::sendUniformMatrix4x2fv(const QString& p_name,  GLsizei  count,  GLboolean  transpose,  const GLfloat * value){
+void CShaderInterface::sendUniform3iv(const QString& p_name,  GLsizei  count,  const GLint * value){
 	QByteArray ba = p_name.toLocal8Bit();
-	glUniformMatrix4x2fv( glGetUniformLocation( m_id, (const char*) ba.data() ), count, transpose, value );
+	glUniform3iv( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), count, value );
 }
 
-void CProgram::sendUniformMatrix3x4fv(const QString& p_name,  GLsizei  count,  GLboolean  transpose,  const GLfloat * value){
+void CShaderInterface::sendUniform4iv(const QString& p_name,  GLsizei  count,  const GLint * value){
 	QByteArray ba = p_name.toLocal8Bit();
-	glUniformMatrix3x4fv( glGetUniformLocation( m_id, (const char*) ba.data() ), count, transpose, value );
+	glUniform4iv( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), count, value );
 }
 
-void CProgram::sendUniformMatrix4x3fv(const QString& p_name,  GLsizei  count,  GLboolean  transpose,  const GLfloat * value){
+
+void CShaderInterface::sendUniformMatrix2fv(const QString& p_name,  GLsizei  count,  GLboolean  transpose,  const GLfloat * value){
 	QByteArray ba = p_name.toLocal8Bit();
-	glUniformMatrix4x3fv( glGetUniformLocation( m_id, (const char*) ba.data() ), count, transpose, value );
+	glUniformMatrix2fv( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), count, transpose, value );
+}
+
+void CShaderInterface::sendUniformMatrix3fv(const QString& p_name,  GLsizei  count,  GLboolean  transpose,  const GLfloat * value){
+	QByteArray ba = p_name.toLocal8Bit();
+	glUniformMatrix3fv( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), count, transpose, value );
+}
+
+void CShaderInterface::sendUniformMatrix4fv(const QString& p_name,  GLsizei  count,  GLboolean  transpose,  const GLfloat * value){
+	QByteArray ba = p_name.toLocal8Bit();
+	glUniformMatrix4fv( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), count, transpose, value );
+}
+
+void CShaderInterface::sendUniformMatrix2x3fv(const QString& p_name,  GLsizei  count,  GLboolean  transpose,  const GLfloat * value){
+	QByteArray ba = p_name.toLocal8Bit();
+	glUniformMatrix2x3fv( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), count, transpose, value );
+}
+
+void CShaderInterface::sendUniformMatrix3x2fv(const QString& p_name,  GLsizei  count,  GLboolean  transpose,  const GLfloat * value){
+	QByteArray ba = p_name.toLocal8Bit();
+	glUniformMatrix3x2fv( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), count, transpose, value );
+}
+
+void CShaderInterface::sendUniformMatrix2x4fv(const QString& p_name,  GLsizei  count,  GLboolean  transpose,  const GLfloat * value){
+	QByteArray ba = p_name.toLocal8Bit();
+	glUniformMatrix2x4fv( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), count, transpose, value );
+}
+
+void CShaderInterface::sendUniformMatrix4x2fv(const QString& p_name,  GLsizei  count,  GLboolean  transpose,  const GLfloat * value){
+	QByteArray ba = p_name.toLocal8Bit();
+	glUniformMatrix4x2fv( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), count, transpose, value );
+}
+
+void CShaderInterface::sendUniformMatrix3x4fv(const QString& p_name,  GLsizei  count,  GLboolean  transpose,  const GLfloat * value){
+	QByteArray ba = p_name.toLocal8Bit();
+	glUniformMatrix3x4fv( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), count, transpose, value );
+}
+
+void CShaderInterface::sendUniformMatrix4x3fv(const QString& p_name,  GLsizei  count,  GLboolean  transpose,  const GLfloat * value){
+	QByteArray ba = p_name.toLocal8Bit();
+	glUniformMatrix4x3fv( glGetUniformLocation( m_singleton.m_current, (const char*) ba.data() ), count, transpose, value );
 }
 
 

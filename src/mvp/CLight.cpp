@@ -50,7 +50,6 @@ CLight::~CLight(){
 }
 
 void CLight::sendToProgram(const CMVP* p_camera, const QMatrix4x4& p_modelMat) const{
-	CProgram* program = CProgram::current();
 	QMatrix4x4 camModelMatOfLight;
 	QMatrix4x4 camModelViewMatOfLight;
 	QVector4D nil(0, 0, 0, 1);
@@ -65,20 +64,20 @@ void CLight::sendToProgram(const CMVP* p_camera, const QMatrix4x4& p_modelMat) c
 	camModelViewMatOfLight.setColumn(3, nil);
 	direction = (camModelViewMatOfLight * m_direction.toVector4D()).toVector3D();
 
-	program->sendUniform1i("light.type", m_type);
-	program->sendUniform4f("light.position", position.x(), position.y(), position.z(), position.w());
-	program->sendUniform3f("light.direction", direction.x(), direction.y(), direction.z());
-	program->sendUniform1f("light.intensity", m_intensity);
-	program->sendUniform3f("light.ambient", m_ambient.x(), m_ambient.y(), m_ambient.z());
-	program->sendUniform3f("light.diffuse", m_diffuse.x(), m_diffuse.y(), m_diffuse.z());
-	program->sendUniform3f("light.specular", m_specular.x(), m_specular.y(), m_specular.z());
+	CShaderInterface::sendUniform1i("light.type", m_type);
+	CShaderInterface::sendUniform4f("light.position", position.x(), position.y(), position.z(), position.w());
+	CShaderInterface::sendUniform3f("light.direction", direction.x(), direction.y(), direction.z());
+	CShaderInterface::sendUniform1f("light.intensity", m_intensity);
+	CShaderInterface::sendUniform3f("light.ambient", m_ambient.x(), m_ambient.y(), m_ambient.z());
+	CShaderInterface::sendUniform3f("light.diffuse", m_diffuse.x(), m_diffuse.y(), m_diffuse.z());
+	CShaderInterface::sendUniform3f("light.specular", m_specular.x(), m_specular.y(), m_specular.z());
 
 	if(m_shadow){
 		m_shadowMap.sendToProgram(m_projMatrix * m_viewMatrix * p_modelMat);
-		program->sendUniform1i("light.noShadow", 0);
+		CShaderInterface::sendUniform1i("light.noShadow", 0);
 	}
 	else
-		program->sendUniform1i("light.noShadow", 1);
+		CShaderInterface::sendUniform1i("light.noShadow", 1);
 }
 
 void CLight::setType(const QString& p_type){
