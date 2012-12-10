@@ -67,6 +67,20 @@ void CMaterialMngr::add(const QString& p_filename){
 			imgPath.push_back(line.split(' ')[1]);
 			m_materials.last().setSpecularMap(imgPath.join("/"));
 		}
+		else if(line.left(7) == "map_Kr "){
+			QStringList imgPath = p_filename.split('/');
+			imgPath.removeLast();
+			imgPath.push_back("img");
+			imgPath.push_back(line.split(' ')[1]);
+			m_materials.last().setReliefMap(imgPath.join("/"));
+		}
+		else if(line.left(7) == "map_Kc "){
+			QStringList imgPath = p_filename.split('/');
+			imgPath.removeLast();
+			imgPath.push_back("img");
+			imgPath.push_back(line.split(' ')[1]);
+			m_materials.last().setConeMap(imgPath.join("/"));
+		}
 	}
 }
 

@@ -19,6 +19,7 @@
 #ifndef CMATERIAL_H_
 #define CMATERIAL_H_
 
+#include "../log/CLog.h"
 #include "CTexture1D.h"
 #include "CTexture2D.h"
 #include "CTexture3D.h"
@@ -42,6 +43,8 @@ public:
 	void setDiffuseMap(const QString&);
 	void setAmbientMap(const QString&);
 	void setSpecularMap(const QString&);
+	void setReliefMap(const QString&);
+	void setConeMap(const QString&);
 
 private:
 	QString m_group;
@@ -51,6 +54,7 @@ private:
 	CTexture2D* m_diffuseMap;
 	CTexture2D* m_ambientMap;
 	CTexture2D* m_specularMap;
+	CTexture2D* m_coneMap;
 };
 
 #endif /* CMATERIAL_H_ */

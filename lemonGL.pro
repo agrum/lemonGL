@@ -24,10 +24,10 @@ HEADERS += src/CLemonGL.h \
     src/object/CMeshMngr.h \
     src/object/CObject.h \
     src/object/CVA.h \
-    src/shader/CProgram.h \
     src/texture/CMaterial.h \
     src/texture/CMaterialMngr.h \
-    src/texture/CTexture.h
+    src/texture/CTexture.h \
+    src/shader/CShaderInterface.h
 SOURCES += src/log/CGLString.cpp \
     src/texture/CTexture3D.cpp \
     src/texture/CTexture2D.cpp \
@@ -40,9 +40,16 @@ SOURCES += src/log/CGLString.cpp \
     src/object/CMeshMngr.cpp \
     src/object/CObject.cpp \
     src/object/CVA.cpp \
-    src/shader/CProgram.cpp \
     src/texture/CMaterial.cpp \
     src/texture/CMaterialMngr.cpp \
-    src/texture/CTexture.cpp
+    src/texture/CTexture.cpp \
+    src/shader/CShaderInterface.cpp \
+    src/CLemonGL.cpp
 FORMS += 
 RESOURCES += 
+
+OTHER_FILES += \
+    shaders/opaque.vs \
+    shaders/opaque.fs \
+    shaders/illumination.vs \
+    shaders/illumination.fs
