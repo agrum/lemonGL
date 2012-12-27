@@ -26,6 +26,7 @@ void CTexture::init(){
 }
 
 CTexture::CTexture(QString p_prefix, GLuint p_channel, GLenum p_intFormat, GLenum p_format, GLenum p_type):
+pLogBehavior("CTexture"),
 m_prefix(p_prefix),
 m_channel(p_channel),
 m_internalFormat(p_intFormat),
@@ -34,31 +35,29 @@ m_type(p_type),
 m_data(0),
 m_fixed(false)
 {
-	CLog::sign(this, "CTexture");
-
 	if(!m_freeChannelList.contains(m_channel)){
-		CLog::log(this, CLog::WARNING, CLog::ERROR_USED, "channel fixed by another texture");
+		pLog::logW(this, pLog::WARNING_NONE, "channel fixed by another texture");
 		return;
 	}
 
 	glGetError();
 	glGenTextures(1, &m_id);
 	if(int e = glGetError() != 0)
-		CLog::log(this, CLog::ERROR, CLog::ERROR_GL, "glGenTextures() " + CGLString(e));
+		pLog::logE(this, pLog::ERROR_NONE, "glGenTextures() " + CGLString(e));
 }
 
 CTexture::~CTexture(){
 	glGetError();
 	glDeleteTextures(1, &m_id);
 	if(int e = glGetError() != 0)
-		CLog::log(this, CLog::ERROR, CLog::ERROR_GL, "glDeleteTextures() " + CGLString(e));
+		pLog::logE(this, pLog::ERROR_NONE, "glDeleteTextures() " + CGLString(e));
 	if(m_fixed)
 		m_freeChannelList.push_back(m_channel);
 }
 
 void CTexture::fix(){
 	if(!m_freeChannelList.contains(m_channel)){
-		CLog::log(this, CLog::ERROR, CLog::ERROR_USED, "channel already fixed, can't fix");
+		pLog::logE(this, pLog::ERROR_NONE, "channel already fixed, can't fix");
 		return;
 	}
 
@@ -74,7 +73,7 @@ void CTexture::setData(void* p_data){
 	glGetError();
 	setTex();
 	if(int e = glGetError() != 0)
-		CLog::log(this, CLog::ERROR, CLog::ERROR_GL, "setData() " + CGLString(e));
+		pLog::logE(this, pLog::ERROR_NONE, "setData() " + CGLString(e));
 }
 
 void CTexture::setParameter(GLenum p_name, GLfloat p_param){
@@ -83,7 +82,7 @@ void CTexture::setParameter(GLenum p_name, GLfloat p_param){
 	glTexParameterf(m_target, p_name, p_param);
 	glBindTexture(m_target, 0);
 	if(int e = glGetError() != 0)
-		CLog::log(this, CLog::ERROR, CLog::ERROR_GL, "setParameter() " + CGLString(e));
+		pLog::logE(this, pLog::ERROR_NONE, "setParameter() " + CGLString(e));
 }
 
 void CTexture::setParameter(GLenum p_name, GLint p_param){
@@ -92,7 +91,7 @@ void CTexture::setParameter(GLenum p_name, GLint p_param){
 	glTexParameteri(m_target, p_name, p_param);
 	glBindTexture(m_target, 0);
 	if(int e = glGetError() != 0)
-		CLog::log(this, CLog::ERROR, CLog::ERROR_GL, "setParameter() " + CGLString(e));
+		pLog::logE(this, pLog::ERROR_NONE, "setParameter() " + CGLString(e));
 }
 
 void CTexture::send() const {
@@ -103,5 +102,5 @@ void CTexture::send() const {
 		glBindTexture(m_target, m_id);
 	}
 	if(int e = glGetError() != 0)
-		CLog::log(this, CLog::ERROR, CLog::ERROR_GL, "send() " + CGLString(e));
+		pLog::logE(this, pLog::ERROR_NONE, "send() " + CGLString(e));
 }

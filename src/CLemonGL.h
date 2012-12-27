@@ -19,7 +19,6 @@
 #ifndef CLEMONGL_H_
 #define CLEMONGL_H_
 
-#include "../src/log/CLog.h"
 #include "../src/object/CObject.h"
 #include "../src/object/CMeshMngr.h"
 

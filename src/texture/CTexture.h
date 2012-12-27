@@ -20,15 +20,16 @@
 #define CTEXTURE_H_
 
 #include "../CGL.h"
-#include "../log/CLog.h"
+#include "../CGLString.h"
 #include "../shader/CShaderInterface.h"
 
+#include "pomelog.h"
 #include <limits>
 #include <cmath>
 #include <QString>
 #include <QMatrix4x4>
 
-class CTexture {
+class CTexture : public pLogBehavior {
 
 public:
 	CTexture(QString, GLuint, GLenum, GLenum, GLenum);

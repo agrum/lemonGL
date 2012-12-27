@@ -19,6 +19,7 @@
 #include "CMaterial.h"
 
 CMaterial::CMaterial(const QString& p_group):
+pLogBehavior("CMat" + p_group),
 m_group(p_group),
 m_diffuse(0,0,0),
 m_ambient(0,0,0),
@@ -28,10 +29,11 @@ m_ambientMap(NULL),
 m_specularMap(NULL),
 m_coneMap(NULL)
 {
-	CLog::sign(this, "CMat" + p_group);
+
 }
 
 CMaterial::CMaterial(const CMaterial& p_mat):
+pLogBehavior("CMat" + p_mat.m_group),
 m_group(p_mat.m_group),
 m_diffuse(0,0,0),
 m_ambient(0,0,0),
@@ -41,7 +43,7 @@ m_ambientMap(NULL),
 m_specularMap(NULL),
 m_coneMap(NULL)
 {
-	CLog::sign(this, "CMat" + m_group);
+
 }
 
 CMaterial::~CMaterial(){
@@ -145,7 +147,7 @@ void CMaterial::setReliefMap(const QString& p_filename){
 		return;
 	}
 	if( ! img.load(p_filename) )
-		CLog::log(this, CLog::WARNING, CLog::ERROR_NULL, "error loading texture " + p_filename);
+		pLog::logW(this, pLog::WARNING_NONE, "error loading texture " + p_filename);
 	img = img.convertToFormat(QImage::Format_ARGB32);
 	data = img.bits();
 	width = img.width();

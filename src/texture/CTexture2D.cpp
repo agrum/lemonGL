@@ -91,7 +91,7 @@ void CTexture2D::appendImg(const QString& p_filename){
 
 void CTexture2D::setSize(GLuint p_width, GLuint p_height){
 	if(p_width > GL_MAX_TEXTURE_SIZE || p_height > GL_MAX_TEXTURE_SIZE)
-		CLog::log(this, CLog::ERROR, CLog::ERROR_SIZE, "GL_MAX_TEXTURE_SIZE");
+		pLog::logE(this, pLog::ERROR_NONE, "GL_MAX_TEXTURE_SIZE");
 
 	if(p_width != m_width || p_height != m_height){
 		m_width = p_width;

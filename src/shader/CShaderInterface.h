@@ -20,15 +20,15 @@
 #define CPROGRAM_H_
 
 #include "../CGL.h"
-#include "../log/CLog.h"
 
+#include <pomelog.h>
 #include <QVector>
 #include <QLinkedList>
 #include <QString>
 #include <QFile>
 #include <QDebug>
 
-class CShaderInterface {
+class CShaderInterface : public pLogBehavior {
 
 public:
 	static GLint add(const QString&);

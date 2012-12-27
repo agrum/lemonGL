@@ -20,8 +20,10 @@
 
 CShaderInterface CShaderInterface::m_singleton;
 
-CShaderInterface::CShaderInterface(){
-	CLog::sign(this, "CShaderInterface");
+CShaderInterface::CShaderInterface():
+	pLogBehavior("CShaderInterface")
+{
+
 }
 
 CShaderInterface::~CShaderInterface(){
@@ -78,7 +80,7 @@ int CShaderInterface::createShader(GLuint p_id, const QString& p_filename, GLenu
 	const GLchar* content = loadShader(p_filename);
 
 	if (content == NULL){
-		CLog::log(this, CLog::INFO, CLog::ERROR_NULL, "Can't load shader " + p_filename);
+		pLog::logI(this, pLog::ERROR_NULL, "Can't load shader " + p_filename);
 		return -1;
 	}
 
@@ -93,7 +95,7 @@ int CShaderInterface::createShader(GLuint p_id, const QString& p_filename, GLenu
 		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logSize);
 		log.resize(logSize - 1);
 		glGetShaderInfoLog(shader, logSize, &logSize, log.data());
-		CLog::log(this, CLog::ERROR, CLog::ERROR_NULL, "Fail compile shader " + p_filename);
+		pLog::logE(this, pLog::ERROR_NULL, "Fail compile shader " + p_filename);
 		qDebug() << QString("Fail compile shader %:\n\n%2").arg(p_filename).arg(QString(log));
 		return -2;
 	}
@@ -117,7 +119,7 @@ GLint CShaderInterface::initProgram( const QString& p_shaderPrefix ){
 		glGetProgramiv(id, GL_INFO_LOG_LENGTH, &logSize);
 		log.resize(logSize - 1);
 		glGetProgramInfoLog(id, logSize, &logSize, log.data());
-		CLog::log(this, CLog::ERROR, CLog::ERROR_NULL, "Fail link program");
+		pLog::logE(this, pLog::ERROR_NULL, "Fail link program");
 		qDebug() << QString("Fail link program \n\n%1").arg(QString(log));
 		glDeleteProgram(id);
 		return -1;

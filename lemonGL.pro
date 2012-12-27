@@ -3,18 +3,19 @@ TARGET = lemonGL
 QT += core \
     xml \
     opengl
-INCLUDEPATH += /usr/include/GL
+INCLUDEPATH += /usr/include/GL\
+	/home/agrum/Workspace/pomelog/include
 LIBS += -lGLEW \
+	-L/home/agrum/Workspace/pomelog/lib \
+	-lpomelog \
     -lGLU \
     -lGL
 DESTDIR = lib
 HEADERS += src/CLemonGL.h \
-    src/log/CGLString.h \
+	src/CGLString.h \
     src/texture/CTexture3D.h \
     src/texture/CTexture2D.h \
-    src/texture/CTexture1D.h \
-    src/log/CLogString.h \
-    src/log/CLog.h \
+	src/texture/CTexture1D.h \
     include/lemonGL.h \
     src/CGL.h \
     src/mvp/CLight.h \
@@ -28,11 +29,10 @@ HEADERS += src/CLemonGL.h \
     src/texture/CMaterialMngr.h \
     src/texture/CTexture.h \
     src/shader/CShaderInterface.h
-SOURCES += src/log/CGLString.cpp \
+SOURCES += src/CGLString.cpp \
     src/texture/CTexture3D.cpp \
     src/texture/CTexture2D.cpp \
-    src/texture/CTexture1D.cpp \
-    src/log/CLog.cpp \
+	src/texture/CTexture1D.cpp \
     src/mvp/CLight.cpp \
     src/mvp/CMVP.cpp \
     src/object/CFace.cpp \

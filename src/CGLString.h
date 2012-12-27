@@ -16,23 +16,16 @@
 	along with lemonGL.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CLOGSTRING_H_
-#define CLOGSTRING_H_
+#ifndef CGLSTRING_H_
+#define CGLSTRING_H_
 
-//Code strings
-#define CLOG_CODE_INFO "I"
-#define CLOG_CODE_DEBUG "D"
-#define CLOG_CODE_WARNING "W"
-#define CLOG_CODE_ERROR "E"
+#include "CGL.h"
+#include <QString>
 
-//Message strings
-#define CLOG_MSG_ERROR_LOG_FILE "LOG_FILE"
-#define CLOG_MSG_ERROR_SIGNATURE "SIGNATURE"
-#define CLOG_MSG_ERROR_CODE "CODE"
-#define CLOG_MSG_ERROR_MESSAGE "MESSAGE"
-#define CLOG_MSG_ERROR_GL "OPENGL"
-#define CLOG_MSG_ERROR_SIZE "SIZE"
-#define CLOG_MSG_ERROR_USED "USED"
-#define CLOG_MSG_ERROR_NULL "NULL"
+class CGLString : public QString {
 
-#endif /* CLOGSTRING_H_ */
+public:
+	CGLString(GLenum);
+};
+
+#endif /* CGLSTRING_H_ */

@@ -19,14 +19,14 @@
 #ifndef CMATERIAL_H_
 #define CMATERIAL_H_
 
-#include "../log/CLog.h"
 #include "CTexture1D.h"
 #include "CTexture2D.h"
 #include "CTexture3D.h"
 
+#include "pomelog.h"
 #include <QVector3D>
 
-class CMaterial {
+class CMaterial : public pLogBehavior {
 
 public:
 	CMaterial(const QString&);
